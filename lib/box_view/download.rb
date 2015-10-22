@@ -1,5 +1,5 @@
-module Crocodoc
-  # Provides access to the Crocodoc Download API. The Download API is used for
+module BoxView
+  # Provides access to the BoxView Download API. The Download API is used for
   # downloading an original of a document, a PDF of a document, a thumbnail of a
   # document, and text extracted from a document.
   class Download
@@ -16,7 +16,7 @@ module Crocodoc
       @@path
     end
     
-    # Download a document's original file from Crocodoc. The file can
+    # Download a document's original file from BoxView. The file can
     # optionally be downloaded as a PDF, as another filename, with
     # annotations, and with filtered annotations.
     # 
@@ -28,7 +28,7 @@ module Crocodoc
     #   if it's a comma-separated list of user IDs as the filter
     # 
     # @return [String] The downloaded file contents as a string
-    # @raise CrocodocError
+    # @raise BoxViewError
     def self.document(uuid, is_pdf=false, is_annotated=false, filter=nil)
       get_params = {uuid: uuid}
       get_params['pdf'] = 'true' if is_pdf
@@ -39,28 +39,28 @@ module Crocodoc
         get_params['filter'] = filter
       end
       
-      Crocodoc._request(self.path, 'document', get_params, nil, false)
+      BoxView._request(self.path, 'document', get_params, nil, false)
     end
     
-    # Download a document's extracted text from Crocodoc.
+    # Download a document's extracted text from BoxView.
     # 
     # @param [String] uuid The uuid of the file to extract text from
     # 
     # @return [String] The file's extracted text
-    # @raise CrocodocError
+    # @raise BoxViewError
     def self.text(uuid)
       get_params = {uuid: uuid}
-      Crocodoc._request(self.path, 'text', get_params, nil, false)
+      BoxView._request(self.path, 'text', get_params, nil, false)
     end
   
-    # Download a document's thumbnail from Crocodoc with an optional size.
+    # Download a document's thumbnail from BoxView with an optional size.
     # 
     # @param [String] uuid The uuid of the file to download the thumbnail from
     # @param [Integer] width The width you want the thumbnail to be
     # @param [Integer] height The height you want the thumbnail to be
     # 
     # @return [String] The downloaded thumbnail contents
-    # @raise CrocodocError
+    # @raise BoxViewError
     def self.thumbnail(uuid, width=nil, height=nil)
       get_params = {uuid: uuid}
     
@@ -68,7 +68,7 @@ module Crocodoc
         get_params['size'] = String(width) + 'x' + String(height)
       end
     
-      Crocodoc._request(self.path, 'thumbnail', get_params, nil, false)
+      BoxView._request(self.path, 'thumbnail', get_params, nil, false)
     end
   end
 end

@@ -1,6 +1,6 @@
-# CrocodocError extends the default exception class.
+# BoxViewError extends the default exception class.
 # It adds a code field.
-class CrocodocError < StandardError
+class BoxViewError < StandardError
   # An error code string
   @code = nil
   

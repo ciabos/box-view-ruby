@@ -1,2 +1,2 @@
-source "http://gems.github.com"
+source 'http://gems.github.com'
 gemspec

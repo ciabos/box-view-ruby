@@ -2,22 +2,22 @@
 
 # Require libraries and set API token
 require 'pathname'
-require_relative 'lib/crocodoc'
-Crocodoc.api_token = 'YOUR_API_TOKEN'
+require_relative 'lib/box_view'
+BoxView.api_token = 'YOUR_API_TOKEN'
 
 # == Example #1
 # 
-# Upload a file to Crocodoc. We're uploading Form W4 from the IRS by URL.
+# Upload a file to BoxView. We're uploading Form W4 from the IRS by URL.
 puts 'Example #1 - Upload Form W4 from the IRS by URL.'
 form_w4_url = 'http://www.irs.gov/pub/irs-pdf/fw4.pdf'
 print '  Uploading... '
 uuid = nil
 
 begin
-  uuid = Crocodoc::Document.upload(form_w4_url)
+  uuid = BoxView::Document.upload(form_w4_url)
   puts 'success :)'
   puts '  UUID is ' + uuid
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -31,7 +31,7 @@ puts 'Example #2 - Check the status of the file we just uploaded.'
 print '  Checking status... '
 
 begin
-  status = Crocodoc::Document.status(uuid)
+  status = BoxView::Document.status(uuid)
   
   unless status.has_key? 'error'
     puts 'success :)'
@@ -41,7 +41,7 @@ begin
     puts 'failed :('
     puts '  Error Message: ' + status['error']
   end
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -49,7 +49,7 @@ end
 
 # == Example #3
 # 
-# Upload another file to Crocodoc. We're uploading Form W4 from the IRS as a PDF.
+# Upload another file to BoxView. We're uploading Form W4 from the IRS as a PDF.
 puts ''
 puts 'Example #3 - Upload a sample .pdf as a file.'
 uuid2 = nil
@@ -60,10 +60,10 @@ if File.exists? file_path
   print '  Uploading... '
 
   begin
-    uuid2 = Crocodoc::Document.upload(file_handle)
+    uuid2 = BoxView::Document.upload(file_handle)
     puts 'success :)'
     puts '  UUID is ' + uuid2
-  rescue CrocodocError => e
+  rescue BoxViewError => e
     puts 'failed :('
     puts '  Error Code: ' + e.code
     puts '  Error Message: ' + e.message
@@ -80,7 +80,7 @@ puts 'Example #4 - Check the status of both files at the same time.'
 print '  Checking statuses... '
 
 begin
-  statuses = Crocodoc::Document.status([uuid, uuid2])
+  statuses = BoxView::Document.status([uuid, uuid2])
   
   if statuses
     puts 'success :)'
@@ -104,7 +104,7 @@ begin
     puts 'failed :('
     puts '  Statuses were not returned.'
   end
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -121,7 +121,7 @@ puts 'done.'
 print '  Checking statuses... '
 
 begin
-  statuses = Crocodoc::Document.status([uuid, uuid2])
+  statuses = BoxView::Document.status([uuid, uuid2])
   
   if statuses
     puts 'success :)'
@@ -145,7 +145,7 @@ begin
     puts 'failed :('
     puts '  Statuses were not returned.'
   end
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -159,7 +159,7 @@ puts 'Example #6 - Delete the first file we uploaded.'
 print '  Deleting... '
 
 begin
-  deleted = Crocodoc::Document.delete(uuid)
+  deleted = BoxView::Document.delete(uuid)
   
   if deleted
     puts 'success :)'
@@ -167,7 +167,7 @@ begin
   else
     print 'failed :('
   end
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -181,13 +181,13 @@ puts 'Example #7 - Download a file as an original.'
 print '  Downloading... '
 
 begin
-  file = Crocodoc::Download.document(uuid2)
+  file = BoxView::Download.document(uuid2)
   filename = String(Pathname.new(File.expand_path(__FILE__)).dirname) + '/example-files/test-original.pdf'
   file_handle = File.open(filename, 'w')
   file_handle.write(file)
   puts 'success :)'
   puts '  File was downloaded to ' + filename + '.'
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -201,13 +201,13 @@ puts 'Example #8 - Download a file as a PDF.'
 print '  Downloading... '
 
 begin
-  file = Crocodoc::Download.document(uuid2, true)
+  file = BoxView::Download.document(uuid2, true)
   filename = String(Pathname.new(File.expand_path(__FILE__)).dirname) + '/example-files/test.pdf'
   file_handle = File.open(filename, 'w')
   file_handle.write(file)
   puts 'success :)'
   puts '  File was downloaded to ' + filename + '.'
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -221,13 +221,13 @@ puts 'Example #9 - Download a file with all options.'
 print '  Downloading... '
 
 begin
-  file = Crocodoc::Download.document(uuid2, true, true, 'all')
+  file = BoxView::Download.document(uuid2, true, true, 'all')
   filename = String(Pathname.new(File.expand_path(__FILE__)).dirname) + '/example-files/test-with-options.pdf'
   file_handle = File.open(filename, 'w')
   file_handle.write(file)
   puts 'success :)'
   puts '  File was downloaded to ' + filename + '.'
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -241,13 +241,13 @@ puts 'Example #10 - Download a default thumbnail from a file.'
 print '  Downloading... '
 
 begin
-  file = Crocodoc::Download.thumbnail(uuid2)
+  file = BoxView::Download.thumbnail(uuid2)
   filename = String(Pathname.new(File.expand_path(__FILE__)).dirname) + '/example-files/thumbnail.png'
   file_handle = File.open(filename, 'w')
   file_handle.write(file)
   puts 'success :)'
   puts '  File was downloaded to ' + filename + '.'
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -261,13 +261,13 @@ puts 'Example #11 - Download a large thumbnail from a file.'
 print '  Downloading... '
 
 begin
-  file = Crocodoc::Download.thumbnail(uuid2, 250, 250)
+  file = BoxView::Download.thumbnail(uuid2, 250, 250)
   filename = String(Pathname.new(File.expand_path(__FILE__)).dirname) + '/example-files/thumbnail-large.png'
   file_handle = File.open(filename, 'w')
   file_handle.write(file)
   puts 'success :)'
   puts '  File was downloaded to ' + filename + '.'
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -281,13 +281,13 @@ puts 'Example #12 - Download extracted text from a file.'
 print '  Downloading... '
 
 begin
-  file = Crocodoc::Download.text(uuid2)
+  file = BoxView::Download.text(uuid2)
   filename = String(Pathname.new(File.expand_path(__FILE__)).dirname) + '/example-files/text.txt'
   file_handle = File.open(filename, 'w')
   file_handle.write(file)
   puts 'success :)'
   puts '  File was downloaded to ' + filename + '.'
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -303,10 +303,10 @@ print '  Creating... '
 session_key = nil
 
 begin
-  session_key = Crocodoc::Session.create(uuid2)
+  session_key = BoxView::Session.create(uuid2)
   puts 'success :)'
   puts '  The session key is ' + session_key + '.'
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -323,8 +323,8 @@ session_key = nil
 
 begin
   user = {'id' => 1,
-          'name' => 'John Crocodoc'}
-  session_key = Crocodoc::Session.create(uuid2, {'is_editable' => true,
+          'name' => 'John BoxView'}
+  session_key = BoxView::Session.create(uuid2, {'is_editable' => true,
                                                  'user' => user,
                                                  'filter' => 'all',
                                                  'is_admin' => true,
@@ -334,7 +334,7 @@ begin
                                                  'sidebar' => 'visible'})
   puts 'success :)'
   puts '  The session key is ' + session_key + '.'
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message
@@ -348,7 +348,7 @@ puts 'Example #15 - Delete the second file we uploaded.'
 print '  Deleting... '
 
 begin
-  deleted = Crocodoc::Document.delete(uuid2)
+  deleted = BoxView::Document.delete(uuid2)
   
   if deleted
     puts 'success :)'
@@ -356,7 +356,7 @@ begin
   else
     print 'failed :('
   end
-rescue CrocodocError => e
+rescue BoxViewError => e
   puts 'failed :('
   puts '  Error Code: ' + e.code
   puts '  Error Message: ' + e.message

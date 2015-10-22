@@ -1,24 +1,19 @@
-# require core functionality
 require 'json'
 require 'rest-client'
+require_relative 'box_view_error'
+require_relative 'box_view/document'
+require_relative 'box_view/download'
+require_relative 'box_view/session'
 
-# require our exception class
-require_relative 'crocodoc_error'
-
-# require the different crocodoc clients
-require_relative 'crocodoc/document'
-require_relative 'crocodoc/download'
-require_relative 'crocodoc/session'
-
-module Crocodoc
-  # The developer's Crocodoc API token
+module BoxView
+  # The developer's BoxView API token
   @@api_token = nil
   
-  # The default protocol (Crocodoc uses HTTPS)
+  # The default protocol (BoxView uses HTTPS)
   @@protocol = 'https'
   
   # The default host
-  @@host = 'crocodoc.com'
+  @@host = 'view-api.box.com'
   
   # The default base path on the server where the API lives
   @@base_path = '/api/v2'
@@ -72,12 +67,12 @@ module Crocodoc
   # @param [Hash<String,>, String] response This is a hash of the response,
   #   usually from JSON, but can also be a string
   # 
-  # @raise [CrocodocError]
+  # @raise [BoxViewError]
   def self._error(error, client, method, response)
     message = self.name + ': [' + error + '] ' + client + '.' + String(method) + "\r\n\r\n"
     response = JSON.generate(response) if response.is_a? Hash
     message += response unless response.nil?
-    raise CrocodocError.new(message, error)
+    raise BoxViewError.new(message, error)
   end
   
   # Make an HTTP request. Some of the params are polymorphic - get_params and
@@ -96,7 +91,7 @@ module Crocodoc
   # 
   # @return [Hash<String,>, String] The response hash is usually converted from
   #   JSON, but sometimes we just return the raw response from the server
-  # @raise [CrocodocError]
+  # @raise [BoxViewError]
   def self._request(path, method, get_params, post_params, is_json=true)
     url = @@protocol + '://' + @@host + @@base_path + path + method
 
