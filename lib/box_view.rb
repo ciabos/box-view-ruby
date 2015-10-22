@@ -36,7 +36,7 @@ module BoxView
     }
 
     payload = method == :get ? nil : params.to_json
-    headers.merge!(params) if method == :get
+    headers.merge!(:params => params) if method == :get
 
     response =
       RestClient::Request.execute(
