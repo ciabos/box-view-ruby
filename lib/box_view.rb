@@ -27,7 +27,7 @@ module BoxView
     raise BoxViewError.new(message, error)
   end
 
-  def self._request(path, params = {}, json_response: true, method: :get, version: 1)
+  def self._request(path, params = {}, json_response: true, method: :get, version: 1, raise_unless_ready: false)
     url = "https://view-api.box.com/#{version}#{path}"
 
     headers = {
@@ -51,6 +51,10 @@ module BoxView
     result = decode_json(result) if json_response
 
     http_code = Integer(response.code)
+
+    if http_code == 202 && raise_unless_ready
+      raise BoxViewError::NotReady.new("Resource is not yet ready: #{path}")
+    end
 
     http_4xx_error_codes = {
       400 => 'bad_request',

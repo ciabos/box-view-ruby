@@ -13,4 +13,10 @@ class BoxViewError < StandardError
     super message
     @code = code
   end
+
+  class NotReady < BoxViewError
+    def initialize(message)
+      super message, 202
+    end
+  end
 end

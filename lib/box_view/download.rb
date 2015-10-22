@@ -14,8 +14,9 @@ module BoxView
     def self.thumbnail(id, width:, height:)
       return BoxView::_error('invalid_dimensions', name, __method__, nil) unless width && height
 
-      BoxView._request("/documents/#{id}/thumbnail", { :width => width, :height => height },
-        { :json_response => false })
+      params = {:width => width, :height => height}
+      BoxView._request("/documents/#{id}/thumbnail", params, :json_response => false,
+        :raise_unless_ready => true)
     end
   end
 end
