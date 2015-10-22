@@ -45,31 +45,22 @@ module BoxView
       response = BoxView._request(self.path, 'status', get_params, nil)
       is_single_uuid ? response[0] : response
     end
-  	
-  	# Upload a file to BoxView with a URL.
-    # 
-    # @param url_or_file [String, File] The url of the file to upload or a file resource
-    # 
-    # @return [String] The uuid of the newly-uploaded file
-    # @raise [BoxViewError]
-    def self.upload(url_or_file)
-      post_params = {}
-      
-      if url_or_file.is_a? String
-        post_params['url'] = url_or_file
-      elsif url_or_file.respond_to?(:read) && url_or_file.respond_to?(:path)
-      	post_params['file'] = url_or_file
-      else
-      	return BoxView::_error('invalid_url_or_file_param', self.name, __method__, nil)
-      end
-      
-      response = BoxView::_request(self.path, 'upload', nil, post_params)
-      
-      unless response.has_key? 'uuid'
-      	return BoxView::_error('missing_uuid', self.name, __method__, response)
-      end
-      
-      response['uuid']
+
+    def self.upload(url)
+      return BoxView::_error('files_not_supported', self.name, __method__, nil) if file?(url)
+      return BoxView::_error('invalid_url', self.name, __method__, nil) unless url.is_a?(String)
+
+      params = {
+        :url => url
+      }
+
+      response = BoxView._request('/documents', params, :method => :post)
+
+      response['id'] || BoxView::_error('missing_id', self.name, __method__, response)
+    end
+
+    def self.file?(arg)
+      arg.respond_to?(:read) && arg.respond_to?(:path)
     end
   end
 end

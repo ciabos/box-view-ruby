@@ -14,10 +14,7 @@ module BoxView
   
   # The default host
   @@host = 'view-api.box.com'
-  
-  # The default base path on the server where the API lives
-  @@base_path = '/api/v2'
-  
+
   # Set the API token
   def self.api_token=(api_token)
     @@api_token = api_token
@@ -48,16 +45,6 @@ module BoxView
     @@host
   end
   
-  # Set the base path
-  def self.base_path=(base_path)
-    @@base_path = base_path
-  end
-  
-  # Get the base path
-  def self.base_path
-    @@base_path
-  end
-  
   # Handle an error. We handle errors by throwing an exception.
   # 
   # @param [String] error An error code representing the error
@@ -74,17 +61,13 @@ module BoxView
     message += response unless response.nil?
     raise BoxViewError.new(message, error)
   end
-  
+
   # Make an HTTP request. Some of the params are polymorphic - get_params and
   # post_params. 
   # 
   # @param [String] path The path on the server to make the request to
   #   relative to the base path
-  # @param [String] method This is just an addition to the path, for example,
-  #   in "/documents/upload" the method would be "upload"
-  # @param [Hash<String, String>] get_params A hash of GET params to be added
-  #   to the URL
-  # @param [Hash<String, String>] post_params A hash of GET params to be added
+  # @param [Hash<String, String>] params Payload to be sent to the server
   #   to the URL
   # @param [Boolean] is_json Should the file be converted from JSON? Defaults to
   #   true.
@@ -92,44 +75,28 @@ module BoxView
   # @return [Hash<String,>, String] The response hash is usually converted from
   #   JSON, but sometimes we just return the raw response from the server
   # @raise [BoxViewError]
-  def self._request(path, method, get_params, post_params, is_json=true)
-    url = @@protocol + '://' + @@host + @@base_path + path + method
+  def self._request(path, params, json_response: true, method: :get, version: 1)
+    url = "#{protocol}://#{host}/#{version}#{path}"
 
-    # add the API token to get_params
-    get_params = {} unless get_params
-    get_params['token'] = @@api_token
-    
-    # add the API token to post_params
-    if post_params and post_params.length > 0
-      # add the API token to post_params
-      post_params['token'] = @@api_token
-    end
+    headers = {
+      :content_type => 'application/json',
+      :authorization => "Token #{BoxView.api_token}"
+    }
 
-    result = nil
-    http_code = nil
-    
-    if post_params && post_params.length > 0
-      response = RestClient.post(url, post_params, params: get_params){|response, request, result| result }
-      result = RestClient::Request.decode(response['content-encoding'], response.body)
-      http_code = Integer(response.code)
-    else
-      response = RestClient.get(url, params: get_params){|response, request, result| result }
-      result = RestClient::Request.decode(response['content-encoding'], response.body)
-      http_code = Integer(response.code)
-    end
-    
-    if is_json
-      json_decoded = false
-      
-      if result == 'true'
-        json_decoded = true
-      elsif result == 'false' or result == ''
-        json_decoded = false
+    response =
+      if method == :get
+        RestClient.get(url, :params => params, :headers => headers) { |response| response }
       else
-        json_decoded = JSON.parse(result)
+        RestClient.post(url, params.to_json, headers) { |response| response}
       end
+
+    result = RestClient::Request.decode(response['content-encoding'], response.body)
+    http_code = Integer(response.code)
+
+    if json_response
+      json_decoded = JSON.parse(result)
   
-      if json_decoded == false
+      unless json_decoded
         return self._error('server_response_not_valid_json', self.name, __method__, {
           response: result,
           get_params: get_params,
