@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rest-client'
   s.add_dependency 'json'
+  s.add_development_dependency 'rubocop'
 
   s.files = `git ls-files`.split("\n")
   s.require_paths = ['lib']
