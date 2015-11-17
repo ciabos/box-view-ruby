@@ -19,4 +19,10 @@ class BoxViewError < StandardError
       super message, 202
     end
   end
+
+  class RateLimitExceeded < BoxViewError
+    def initialize(message)
+      super message, 429
+    end
+  end
 end
