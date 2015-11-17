@@ -56,7 +56,7 @@ module BoxView
       raise BoxViewError::NotReady.new("Resource is not yet ready: #{path}")
     end
 
-    raise BoxViewError::RateLimitExceeded if http_code == 429
+    raise BoxViewError::RateLimitExceeded.new("Rate Limit Exceeded") if http_code == 429
 
     http_4xx_error_codes = {
       400 => 'bad_request',
