@@ -11,13 +11,15 @@ module BoxView
       BoxView._request("/documents/#{id}")
     end
 
-    def self.upload(document_url)
+    def self.upload(document_url, thumbnails: nil)
       return BoxView::_error('files_not_supported', self.name, __method__, nil) if file?(document_url)
       return BoxView::_error('invalid_url', self.name, __method__, nil) unless document_url.is_a?(String)
 
       params = {
         :url => document_url
       }
+
+      params[:thumbnails] = thumbnails if thumbnails
 
       response = BoxView._request('/documents', params, :method => :post)
 
