@@ -47,9 +47,6 @@ module BoxView
           response
         end
 
-    result = RestClient::Request.decode(response['content-encoding'], response.body)
-    result = decode_json(result) if json_response
-
     http_code = Integer(response.code)
 
     if http_code == 202 && raise_unless_ready
@@ -64,17 +61,21 @@ module BoxView
       404 => 'not_found',
       405 => 'method_not_allowed'
     }
-    
+
     if http_4xx_error_codes.has_key? http_code
       error = 'server_error_' + http_code.to_s + '_' + http_4xx_error_codes[http_code]
       return _error(error, self.name, __method__, :url => url, :params => params)
     end
-    
+
     if http_code >= 500 and http_code < 600
       error = 'server_error_' + http_code.to_s + '_unknown'
       return _error(error, self.name, __method__, :url => url, :params => params)
     end
-    
+
+    raise BoxViewError::NotReady.new("Resource is not yet ready or is empty: #{path}") unless response.body
+
+    result = RestClient::Request.decode(response['content-encoding'], response.body)
+    result = decode_json(result) if json_response
     result
   end
 
