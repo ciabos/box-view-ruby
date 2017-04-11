@@ -1,5 +1,5 @@
 require 'json'
-require 'rest-client'
+require 'httpclient'
 require_relative 'box_view_error'
 require_relative 'box_view/document'
 require_relative 'box_view/download'
@@ -28,24 +28,12 @@ module BoxView
   end
 
   def self._request(path, params = {}, json_response: true, method: :get, version: 1, raise_unless_ready: false)
-    url = "https://view-api.box.com/#{version}#{path}"
-
-    headers = {
-      :content_type => 'application/json',
-      :authorization => "Token #{BoxView.api_token}"
-    }
-
-    payload = method == :get ? nil : params.to_json
-    headers.merge!(:params => params) if method == :get
-
     response =
-      RestClient::Request.execute(
-        :method => method,
-        :url => url,
-        :payload => payload,
-        :headers => headers) do |response|
-          response
-        end
+      http_client(version).request(
+        method,
+        path,
+        request_options(method, params)
+      )
 
     http_code = Integer(response.code)
 
@@ -59,7 +47,8 @@ module BoxView
       400 => 'bad_request',
       401 => 'unauthorized',
       404 => 'not_found',
-      405 => 'method_not_allowed'
+      405 => 'method_not_allowed',
+      415 => 'unsupported_media_type'
     }
 
     if http_4xx_error_codes.has_key? http_code
@@ -74,9 +63,33 @@ module BoxView
 
     raise BoxViewError::NotReady.new("Resource is not yet ready or is empty: #{path}") unless response.body
 
-    result = RestClient::Request.decode(response['content-encoding'], response.body)
-    result = decode_json(result) if json_response
-    result
+    json_response ? decode_json(response.body) : response.body
+  end
+
+
+  def self.http_client(version)
+    Thread.current["BOXVIEW_HTTPCLIENT_CONNECTION_v#{version}"] ||= HTTPClient.new(
+      :base_url => "https://view-api.box.com/#{version}/",
+      :default_header => {
+        'Content-Type' => 'application/json; charset=utf-8',
+        'Authorization' => "Token #{BoxView.api_token}"
+      }
+    ).tap { |client| client.keep_alive_timeout = 600 }
+  end
+
+  def self.request_options(method, params)
+    case method
+    when :get
+      {
+        :header => {
+          :params => params
+        }
+      }
+    else
+      {
+        :body => params.to_json
+      }
+    end
   end
 
   def self.decode_json(result)

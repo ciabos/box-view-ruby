@@ -8,11 +8,11 @@ Gem::Specification.new do |s|
   s.summary = 'Ruby wrapper for the BoxView API'
   s.description = 'The Box View API lets you upload documents and then generate secure and customized viewing sessions for them.'
   s.authors = ['Brandon Goldman', 'Tim Frey']
-  s.email = %w(brandon.goldman@gmail.com timothy.frey@greenhouse.io)
+  s.email = %w(brandon.goldman@gmail.com timothy.frey@greenhouse.io tim.johnson@greenhouse.io)
   s.homepage = 'https://developers.box.com/view/'
   s.require_paths = %w{lib}
 
-  s.add_dependency 'rest-client'
+  s.add_dependency 'httpclient'
   s.add_dependency 'json'
   s.add_development_dependency 'rubocop'
 

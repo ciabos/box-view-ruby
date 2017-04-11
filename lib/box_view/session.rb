@@ -4,7 +4,7 @@ module BoxView
   # document using a specific session-based URL.
   class Session
     def self.create(id, **params)
-      session = BoxView._request('/sessions', params.merge(:document_id => id), :method => :post,
+      session = BoxView._request('sessions', params.merge(:document_id => id), :method => :post,
         :raise_unless_ready => true)
       
       session['id']
