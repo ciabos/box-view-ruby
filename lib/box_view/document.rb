@@ -3,12 +3,12 @@ module BoxView
   # uploading, checking status, and deleting documents.
   class Document
     def self.delete(id)
-      BoxView._request("/documents/#{id}", :method => :delete, :json_response => false)
+      BoxView._request("documents/#{id}", :method => :delete, :json_response => false)
       true
     end
 
     def self.status(id)
-      BoxView._request("/documents/#{id}")
+      BoxView._request("documents/#{id}")
     end
 
     def self.upload(document_url, thumbnails: nil)
@@ -21,7 +21,7 @@ module BoxView
 
       params[:thumbnails] = thumbnails if thumbnails
 
-      response = BoxView._request('/documents', params, :method => :post)
+      response = BoxView._request('documents', params, :method => :post)
 
       response['id'] || BoxView::_error('missing_id', self.name, __method__, response)
     end
